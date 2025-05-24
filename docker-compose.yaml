@@ -1,0 +1,27 @@
+services:
+  file-storage:
+    build: ./file-storage
+    container_name: file-storage
+    ports:
+      - "8080:8080"
+
+  file-analysis:
+    build: ./file-analysis
+    container_name: file-analysis
+    ports:
+      - "8081:8080"
+    env_file:
+      - "file-analysis/.env"
+    depends_on:
+      - file-storage
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8000:8000"
+    env_file:
+      - "api-gateway/.env"
+    depends_on:
+      - file-storage
+      - file-analysis
