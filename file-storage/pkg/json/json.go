@@ -7,6 +7,7 @@ import (
 
 func ToJSON(i any, w io.Writer) error {
 	e := json.NewEncoder(w)
+	e.SetIndent("", "\t")
 
 	return e.Encode(i)
 }

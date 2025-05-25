@@ -21,3 +21,11 @@ func UploadHandler(wr http.ResponseWriter, r *http.Request) {
 func DownloadHandler(wr http.ResponseWriter, r *http.Request) {
 	fileStorageProxy.ServeHTTP(wr, r)
 }
+
+func GetRecordHandler(wr http.ResponseWriter, r *http.Request) {
+	fileStorageProxy.ServeHTTP(wr, r)
+}
+
+func GetAllRecordsHandler(wr http.ResponseWriter, r *http.Request) {
+	fileStorageProxy.ServeHTTP(wr, r)
+}

@@ -42,8 +42,11 @@ func main() {
 	downloadRouter := sm.Methods(http.MethodGet).Subrouter()
 	downloadRouter.HandleFunc("/download/{id}", h.Download)
 
-	downloadAllRouter := sm.Methods(http.MethodGet).Subrouter()
-	downloadAllRouter.HandleFunc("/download", h.DownloadAll)
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/record/{id}", h.GetRecord)
+
+	getAllRouter := sm.Methods(http.MethodGet).Subrouter()
+	getAllRouter.HandleFunc("/record", h.GetAllRecords)
 
 	s := http.Server{
 		Addr:         ":8080",

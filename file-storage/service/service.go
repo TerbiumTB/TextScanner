@@ -16,9 +16,10 @@ import (
 )
 
 type Serving interface {
-	Add(filename string, content io.ReadCloser) (string, error)
-	Get(id string) (*models.File, error)
-	All() ([]*models.FileRecord, error)
+	Upload(filename string, content io.ReadCloser) (string, error)
+	Download(id string) (*models.File, error)
+	GetRecord(id string) (*models.FileRecord, error)
+	GetAllRecords() ([]*models.FileRecord, error)
 }
 
 type Service struct {
@@ -38,7 +39,7 @@ func NewService(r infrastructure.FileRepositoring, s infrastructure.FileStorer) 
 	}
 }
 
-func (s *Service) Add(filename string, content io.ReadCloser) (string, error) {
+func (s *Service) Upload(filename string, content io.ReadCloser) (string, error) {
 	id := uuid.New()
 
 	//path.Join(id.String(), filename)
@@ -59,7 +60,7 @@ func (s *Service) Add(filename string, content io.ReadCloser) (string, error) {
 	return file.ID.String(), nil
 }
 
-func (s *Service) Get(id string) (f *models.File, err error) {
+func (s *Service) Download(id string) (f *models.File, err error) {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
@@ -82,10 +83,20 @@ func (s *Service) Get(id string) (f *models.File, err error) {
 	return
 }
 
-func (s *Service) All() (f []*models.FileRecord, err error) {
+func (s *Service) GetRecord(id string) (*models.FileRecord, error) {
+	uid, err := uuid.Parse(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return s.repo.Get(uid)
+}
+
+func (s *Service) GetAllRecords() (f []*models.FileRecord, err error) {
 	return s.repo.All()
 	//var a []*models.File
-	//it, err := s.repo.All()
+	//it, err := s.repo.GetAllRecords()
 	//if err != nil {
 	//	return nil, err
 	//}

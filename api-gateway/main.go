@@ -21,8 +21,11 @@ func main() {
 	downloadRouter := sm.Methods(http.MethodGet).Subrouter()
 	downloadRouter.HandleFunc("/download/{id}", handlers.DownloadHandler)
 
-	downloadAllRouter := sm.Methods(http.MethodGet).Subrouter()
-	downloadAllRouter.HandleFunc("/download", handlers.DownloadHandler)
+	getAllRouter := sm.Methods(http.MethodGet).Subrouter()
+	getAllRouter.HandleFunc("/record", handlers.GetAllRecordsHandler)
+
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/record/{id}", handlers.GetRecordHandler)
 
 	analyseRouter := sm.Methods(http.MethodGet).Subrouter()
 	analyseRouter.HandleFunc("/analyse/{id}", handlers.AnalyseHandler)

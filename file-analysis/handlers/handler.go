@@ -26,12 +26,15 @@ type AnalysisResponse struct {
 }
 
 func (h *Handler) Analyse(wr http.ResponseWriter, r *http.Request) {
+	//var res struct{
+	//	Filename string `json:"filename"`
+	//}
 	vargs := mux.Vars(r)
 	id := vargs["id"]
 
 	h.l.Printf("Analysing file \"%s\"...", id)
 
-	//sr, err := h.c.Get(fmt.Sprintf("/download/%s", id))
+	//sr, err := h.c.Download(fmt.Sprintf("/download/%s", id))
 	//
 	//if err != nil {
 	//	h.l.Printf("[ERROR] could not download file %s", id)
