@@ -2,9 +2,8 @@ package service
 
 import (
 	"filestorage/models"
-	"slices"
-	"storj.io/common/uuid"
-
+	//"storj.io/common/uuid"
+	"github.com/google/uuid"
 	//"filestorage/infrastructure"
 	"filestorage/infrastructure"
 
@@ -17,9 +16,9 @@ import (
 )
 
 type Serving interface {
-	Add(filename string, content io.Reader) (string, error)
+	Add(filename string, content io.ReadCloser) (string, error)
 	Get(id string) (*models.File, error)
-	All() []*models.FileRecord
+	All() ([]*models.FileRecord, error)
 }
 
 type Service struct {
@@ -39,13 +38,18 @@ func NewService(r infrastructure.FileRepositoring, s infrastructure.FileStorer) 
 	}
 }
 
-func (s *Service) Add(filename string, content io.Reader) (string, error) {
-	location, err := s.storage.Save(filename, content)
+func (s *Service) Add(filename string, content io.ReadCloser) (string, error) {
+	id := uuid.New()
+
+	//path.Join(id.String(), filename)
+	location, err := s.storage.Save(id.String(), content)
+
 	if err != nil {
+
 		return "", err
 	}
 
-	file := models.NewFileRecord(filename, location)
+	file := models.NewFileRecord(id, filename, location)
 
 	err = s.repo.Add(file)
 	if err != nil {
@@ -56,7 +60,8 @@ func (s *Service) Add(filename string, content io.Reader) (string, error) {
 }
 
 func (s *Service) Get(id string) (f *models.File, err error) {
-	uid, err := uuid.FromString(id)
+	uid, err := uuid.Parse(id)
+
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +82,12 @@ func (s *Service) Get(id string) (f *models.File, err error) {
 	return
 }
 
-func (s *Service) All() []*models.FileRecord {
+func (s *Service) All() (f []*models.FileRecord, err error) {
+	return s.repo.All()
 	//var a []*models.File
-	return slices.Collect(s.repo.All())
+	//it, err := s.repo.All()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//return slices.Collect(it), nil
 }

@@ -7,7 +7,28 @@ services:
     env_file:
       - "file-storage/.env"
     volumes:
-      - storage:/app/storage-files
+      - file-storage-data:/var/lib/docker/volumes/file-storage-data
+    depends_on:
+      file-storage-db:
+          condition: service_healthy
+          restart: true
+
+  file-storage-db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: file-storage-db
+      PGDATA: /var/lib/postgresql/data/file-storage-pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - file-storage-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 1s
+      timeout: 3s
+      retries: 3
 
   file-analysis:
     build: ./file-analysis
@@ -31,5 +52,8 @@ services:
       - file-analysis
 
 volumes:
-  storage:
+  file-storage-data:
     driver: local
+
+  file-storage-pgdata:
+#    driver: local

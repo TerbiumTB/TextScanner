@@ -4,6 +4,7 @@ import (
 	"context"
 	"filestorage/handlers"
 	"filestorage/infrastructure"
+	"filestorage/pkg/postgres"
 	"filestorage/service"
 	"github.com/gorilla/mux"
 	"log"
@@ -14,13 +15,25 @@ import (
 )
 
 func main() {
-	log := log.New(os.Stdout, "File storage ", log.LstdFlags)
+	lg := log.New(os.Stdout, "File storage ", log.LstdFlags)
 
 	storage := infrastructure.NewLocalStorage(os.Getenv("STORAGE_ROOT"))
-	repo := infrastructure.NewFileMap()
+	//repo := infrastructure.NewFileMap()
+
+	db, err := postgres.Init()
+	if err != nil {
+		lg.Fatalf("[ERROR] couldn't establish postgress connection: %s", err)
+	}
+
+	repo, err := infrastructure.NewFileDBX(db)
+
+	if err != nil {
+		lg.Fatalf("[ERROR] couldn't create schema: %s", err)
+	}
+
 	ser := service.NewService(repo, storage)
 
-	h := handlers.NewHandler(log, ser)
+	h := handlers.NewHandler(lg, ser)
 	sm := mux.NewRouter()
 
 	uploadRouter := sm.Methods(http.MethodPost).Subrouter()
@@ -35,19 +48,20 @@ func main() {
 	s := http.Server{
 		Addr:         ":8080",
 		Handler:      sm,
-		ErrorLog:     log,
+		ErrorLog:     lg,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
 	}
 
 	go func() {
-		log.Println("Starting server on port 8080")
+		lg.Println("Starting server on port 8080")
 
 		err := s.ListenAndServe()
 		if err != nil {
-			log.Printf("Error starting server: %s\n", err)
-			os.Exit(1)
+			lg.Fatalf("Error starting server: %s", err)
+			//log.Printf("Error starting server: %s\n", err)
+			//os.Exit(1)
 		}
 	}()
 
@@ -56,7 +70,7 @@ func main() {
 	signal.Notify(c, os.Kill)
 
 	sig := <-c
-	log.Println("Got signal:", sig)
+	lg.Println("Got signal:", sig)
 
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	s.Shutdown(ctx)

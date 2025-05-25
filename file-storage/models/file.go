@@ -2,7 +2,8 @@ package models
 
 import (
 	"io"
-	"storj.io/common/uuid"
+	//"storj.io/common/uuid"
+	"github.com/google/uuid"
 )
 
 type FileRecord struct {
@@ -11,8 +12,9 @@ type FileRecord struct {
 	Location string    `json:"location"`
 }
 
-func NewFileRecord(name string, location string) *FileRecord {
+func NewFileRecord(id uuid.UUID, name string, location string) *FileRecord {
 	return &FileRecord{
+		ID:       id,
 		Name:     name,
 		Location: location,
 	}

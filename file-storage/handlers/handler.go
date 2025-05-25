@@ -34,7 +34,12 @@ func (h *Handler) Upload(wr http.ResponseWriter, r *http.Request) {
 
 	response := &UploadResponse{}
 	var err error
-	response.Id, err = h.s.Add(filename, r.Body)
+	//defer r.Body.Close()
+
+	ff, _, _ := r.FormFile("file")
+	//io.Copy(os.Stdout, ff)
+	response.Id, err = h.s.Add(filename, ff)
+
 	if err != nil {
 		h.l.Printf("[ERROR] Error uploading file \"%s\": %s", filename, err)
 		http.Error(wr, err.Error(), http.StatusInternalServerError)
@@ -73,9 +78,14 @@ func (h *Handler) Download(wr http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DownloadAll(wr http.ResponseWriter, r *http.Request) {
-	h.l.Println("Downloading all files...")
+	h.l.Println("Downloading all file records...")
 
-	files := h.s.All()
+	files, err := h.s.All()
+
+	if err != nil {
+		h.l.Printf("[ERROR] Error downloading all file records: %s", err)
+		return
+	}
 
 	_ = json.ToJSON(&files, wr)
 }

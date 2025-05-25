@@ -2,16 +2,19 @@ package infrastructure
 
 import (
 	"io"
+	"path/filepath"
+
 	//"fmt"
 	//"file-storing/models"
 	// "golang.org/x/xerrors"
 	"os"
-	"path/filepath"
+	//"path/filepath"
+	//"github.com/google/uuid"
 )
 
 type FileStorer interface {
-	Save(filename string, content io.Reader) (string, error)
-	Load(pathname string) (io.Reader, error)
+	Save(filename string, content io.ReadCloser) (string, error)
+	Load(pathname string) (io.ReadCloser, error)
 }
 
 type LocalStorage struct {
@@ -26,8 +29,9 @@ func NewLocalStorage(root string) *LocalStorage {
 	}
 }
 
-func (s *LocalStorage) Save(filename string, content io.Reader) (string, error) {
+func (s *LocalStorage) Save(filename string, content io.ReadCloser) (string, error) {
 	pathname := s.fullPath(filename)
+	defer content.Close()
 
 	file, err := os.Create(pathname)
 	if err != nil {
@@ -43,7 +47,7 @@ func (s *LocalStorage) Save(filename string, content io.Reader) (string, error) 
 	return pathname, nil
 }
 
-func (s *LocalStorage) Load(pathname string) (content io.Reader, err error) {
+func (s *LocalStorage) Load(pathname string) (content io.ReadCloser, err error) {
 	return os.Open(pathname)
 }
 

@@ -1,13 +1,20 @@
-start:
+build:
 	docker-compose build
-	$(MAKE) run
 
 stop:
 	docker-compose down
 
+clean:
+	docker-compose down -v
+
 run:
 	docker-compose up -d
-restart:
-	$(MAKE) stop
-	$(MAKE) start
+
+rerun: | stop run
+
+start: | build run
+
+restart: | stop start
+
+fresh: | clean start
 
