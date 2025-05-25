@@ -1,4 +1,4 @@
-package pkg
+package json
 
 import (
 	"encoding/json"
@@ -10,7 +10,6 @@ func ToJSON(i any, w io.Writer) error {
 
 	return e.Encode(i)
 }
-
 
 func FromJSON(i any, r io.Reader) error {
 	d := json.NewDecoder(r)

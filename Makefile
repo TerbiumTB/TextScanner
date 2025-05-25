@@ -1,9 +1,13 @@
-run:
+start:
 	docker-compose build
-	docker-compose up -d
+	$(MAKE) run
 
 stop:
 	docker-compose down
 
+run:
+	docker-compose up -d
+restart:
+	$(MAKE) stop
+	$(MAKE) start
 
-restart: stop run

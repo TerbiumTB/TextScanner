@@ -1,17 +1,21 @@
 package handlers
 
 import (
+	"filestorage/pkg/json"
+	"filestorage/service"
 	"github.com/gorilla/mux"
+	"io"
 	"log"
 	"net/http"
 )
 
 type Handler struct {
 	l *log.Logger
+	s service.Serving
 }
 
-func NewHandler(l *log.Logger) *Handler {
-	return &Handler{l}
+func NewHandler(l *log.Logger, s service.Serving) *Handler {
+	return &Handler{l, s}
 }
 
 //type File struct {
@@ -20,23 +24,58 @@ func NewHandler(l *log.Logger) *Handler {
 //}
 
 type UploadResponse struct {
-	Filename string `json:"filename"`
+	Id string `json:"id"`
 }
 
-func (h *Handler) Upload(rw http.ResponseWriter, r *http.Request) {
+func (h *Handler) Upload(wr http.ResponseWriter, r *http.Request) {
 	vargs := mux.Vars(r)
 	filename := vargs["filename"]
-
 	h.l.Printf("Uploading file \"%s\"...", filename)
+
+	response := &UploadResponse{}
+	var err error
+	response.Id, err = h.s.Add(filename, r.Body)
+	if err != nil {
+		h.l.Printf("[ERROR] Error uploading file \"%s\": %s", filename, err)
+		http.Error(wr, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_ = json.ToJSON(response, wr)
 }
 
-func (h *Handler) Download(rw http.ResponseWriter, r *http.Request) {
+func (h *Handler) Download(wr http.ResponseWriter, r *http.Request) {
 	vargs := mux.Vars(r)
 	id := vargs["id"]
 
 	h.l.Printf("Downloading file \"%s\"...", id)
+
+	file, err := h.s.Get(id)
+
+	h.l.Printf("Downloading file %#v...", file)
+
+	if err != nil {
+		h.l.Printf("[ERROR] Error downloading file \"%s\": %s", id, err)
+		http.Error(wr, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_ = json.ToJSON(file.Record, wr)
+	//io.Copy(os.Stdout, file.Content)
+	io.Copy(wr, file.Content)
+
+	//h.l.Println(n)
+	//if err != nil {
+	//	h.l.Printf("[ERROR] Error downloading file contents \"%s\": %s", id, err)
+	//}
+	//wr.Write(file.Content)
+
 }
 
-func (h *Handler) DownloadAll(rw http.ResponseWriter, r *http.Request) {
+func (h *Handler) DownloadAll(wr http.ResponseWriter, r *http.Request) {
 	h.l.Println("Downloading all files...")
+
+	files := h.s.All()
+
+	_ = json.ToJSON(&files, wr)
 }

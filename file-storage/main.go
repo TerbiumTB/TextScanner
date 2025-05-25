@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"filestorage/handlers"
+	"filestorage/infrastructure"
+	"filestorage/service"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -12,8 +14,13 @@ import (
 )
 
 func main() {
-	l := log.New(os.Stdout, "File storage ", log.LstdFlags)
-	h := handlers.NewHandler(l)
+	log := log.New(os.Stdout, "File storage ", log.LstdFlags)
+
+	storage := infrastructure.NewLocalStorage(os.Getenv("STORAGE_ROOT"))
+	repo := infrastructure.NewFileMap()
+	ser := service.NewService(repo, storage)
+
+	h := handlers.NewHandler(log, ser)
 	sm := mux.NewRouter()
 
 	uploadRouter := sm.Methods(http.MethodPost).Subrouter()
@@ -28,18 +35,18 @@ func main() {
 	s := http.Server{
 		Addr:         ":8080",
 		Handler:      sm,
-		ErrorLog:     l,
+		ErrorLog:     log,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
 	}
 
 	go func() {
-		l.Println("Starting server on port 8080")
+		log.Println("Starting server on port 8080")
 
 		err := s.ListenAndServe()
 		if err != nil {
-			l.Printf("Error starting server: %s\n", err)
+			log.Printf("Error starting server: %s\n", err)
 			os.Exit(1)
 		}
 	}()

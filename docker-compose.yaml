@@ -4,6 +4,10 @@ services:
     container_name: file-storage
     ports:
       - "8080:8080"
+    env_file:
+      - "file-storage/.env"
+    volumes:
+      - storage:/app/storage-files
 
   file-analysis:
     build: ./file-analysis
@@ -25,3 +29,7 @@ services:
     depends_on:
       - file-storage
       - file-analysis
+
+volumes:
+  storage:
+    driver: local
