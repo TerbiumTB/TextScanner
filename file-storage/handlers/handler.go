@@ -19,15 +19,6 @@ func NewHandler(l *log.Logger, s service.Serving) *Handler {
 	return &Handler{l, s}
 }
 
-//type File struct {
-//	filename string
-//	content  io.Reader
-//}
-
-//type UploadResponse struct {
-//	Id string `json:"id"`
-//}
-
 func (h *Handler) Upload(wr http.ResponseWriter, r *http.Request) {
 	vargs := mux.Vars(r)
 	filename := vargs["filename"]
@@ -69,32 +60,14 @@ func (h *Handler) Download(wr http.ResponseWriter, r *http.Request) {
 
 	mw := multipart.NewWriter(wr)
 	defer mw.Close()
-	//mw.WriteField("id", id)
+
+	wr.Header().Add("Content-Type", mw.FormDataContentType())
 	w, _ := mw.CreateFormField("record")
 	_ = json.ToJSON(file.Record, w)
-	//mw.WriteField("record", file.Record)
 
 	w, _ = mw.CreateFormFile("file", file.Record.Name)
 
 	io.Copy(w, file.Content)
-	//var res struct {
-	//	Id      string `json:"id"`
-	//	Name    string `json:"name"`
-	//	Content []byte `json:"content"`
-	//}
-	//
-	//res.Id = id
-	////res.Name =
-	////_ = json.ToJSON(file.Record, wr)
-	////io.Copy(os.Stdout, file.Content)
-	////io.Copy(wr, file.Content)
-	//json.ToJSON(file, wr)
-	//h.l.Println(n)
-	//if err != nil {
-	//	h.l.Printf("[ERROR] Error downloading file contents \"%s\": %s", id, err)
-	//}
-	//wr.Write(file.Content)
-
 }
 
 func (h *Handler) GetAllRecords(wr http.ResponseWriter, r *http.Request) {

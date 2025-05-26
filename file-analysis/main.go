@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fileanalysis/handlers"
+	"fileanalysis/infrastructure"
+	"fileanalysis/pkg/postgres"
+	"fileanalysis/service"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -15,13 +18,32 @@ func main() {
 	l := log.New(os.Stdout, "API gateway ", log.LstdFlags)
 	c := &http.Client{Timeout: 10 * time.Second}
 
-	h := handlers.NewHandler(l, c)
+	db, err := postgres.Init()
+	if err != nil {
+		l.Fatalf("[ERROR] couldn't establish postgress connection: %s", err)
+	}
+
+	stats, err := infrastructure.NewFileStatsDBX(db)
+	if err != nil {
+		l.Fatalf("[ERROR] couldn't initialize schema: %s", err)
+	}
+
+	s := service.NewService(c, stats)
+	//r := infrastructure.NewFileOriginalityDBX()
+
+	h := handlers.NewHandler(l, c, s)
 	sm := mux.NewRouter()
 
-	downloadRouter := sm.Methods(http.MethodGet).Subrouter()
-	downloadRouter.HandleFunc("/analyse/{id}", h.Analyse)
+	//downloadRouter := sm.Methods(http.MethodGet).Subrouter()
+	//downloadRouter.HandleFunc("/originality/{id}", h.CheckOriginalityHandler)
 
-	s := http.Server{
+	statsRouter := sm.Methods(http.MethodGet).Subrouter()
+	statsRouter.HandleFunc("/stats/{id}", h.GetStatsHandler)
+
+	allStatsRouter := sm.Methods(http.MethodGet).Subrouter()
+	allStatsRouter.HandleFunc("/stats", h.GetAllStatsHandler)
+
+	server := http.Server{
 		Addr:         ":8080",
 		Handler:      sm,
 		ErrorLog:     l,
@@ -33,7 +55,7 @@ func main() {
 	go func() {
 		l.Println("Starting server on port 8080")
 
-		err := s.ListenAndServe()
+		err := server.ListenAndServe()
 		if err != nil {
 			l.Printf("Error starting server: %s\n", err)
 			os.Exit(1)
@@ -48,5 +70,5 @@ func main() {
 	log.Println("Got signal:", sig)
 
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	s.Shutdown(ctx)
+	server.Shutdown(ctx)
 }

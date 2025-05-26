@@ -14,6 +14,10 @@ func init() {
 	fileStorageProxy = httputil.NewSingleHostReverseProxy(storageURL)
 }
 
+func StorageHandler(wr http.ResponseWriter, r *http.Request) {
+	fileStorageProxy.ServeHTTP(wr, r)
+}
+
 func UploadHandler(wr http.ResponseWriter, r *http.Request) {
 	fileStorageProxy.ServeHTTP(wr, r)
 }

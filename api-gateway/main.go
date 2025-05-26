@@ -16,19 +16,25 @@ func main() {
 	sm := mux.NewRouter()
 
 	uploadRouter := sm.Methods(http.MethodPost).Subrouter()
-	uploadRouter.HandleFunc("/upload/{filename}", handlers.UploadHandler)
+	uploadRouter.HandleFunc("/upload/{filename}", handlers.StorageHandler)
 
 	downloadRouter := sm.Methods(http.MethodGet).Subrouter()
-	downloadRouter.HandleFunc("/download/{id}", handlers.DownloadHandler)
+	downloadRouter.HandleFunc("/download/{id}", handlers.StorageHandler)
 
 	getAllRouter := sm.Methods(http.MethodGet).Subrouter()
-	getAllRouter.HandleFunc("/record", handlers.GetAllRecordsHandler)
+	getAllRouter.HandleFunc("/record", handlers.StorageHandler)
 
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/record/{id}", handlers.GetRecordHandler)
+	getRouter.HandleFunc("/record/{id}", handlers.StorageHandler)
 
-	analyseRouter := sm.Methods(http.MethodGet).Subrouter()
-	analyseRouter.HandleFunc("/analyse/{id}", handlers.AnalyseHandler)
+	//analyseRouter := sm.Methods(http.MethodGet).Subrouter()
+	//analyseRouter.HandleFunc("/originality/{id}", handlers.AnalyseHandler)
+
+	statsRouter := sm.Methods(http.MethodGet).Subrouter()
+	statsRouter.HandleFunc("/stats/{id}", handlers.AnalyseHandler)
+
+	allStatsRouter := sm.Methods(http.MethodGet).Subrouter()
+	allStatsRouter.HandleFunc("/stats", handlers.AnalyseHandler)
 
 	s := http.Server{
 		Addr:         ":8000",
