@@ -2,18 +2,29 @@ package main
 
 import (
 	"context"
+	_ "filestorage/docs"
 	"filestorage/handlers"
 	"filestorage/infrastructure"
 	"filestorage/pkg/postgres"
 	"filestorage/service"
 	"github.com/gorilla/mux"
+	swag "github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	//_ "swagger-mux/docs"
+	//_ "go-swag-demo-api/docs"
+	//"github.com/swaggo/swag/"
 	"time"
 )
 
+// @title File Storage API
+// @version 1.0
+// @description API для хранения и управления файлами
+
+// @host localhost:8080
+// @BasePath /
 func main() {
 	lg := log.New(os.Stdout, "File storage ", log.LstdFlags)
 
@@ -47,6 +58,8 @@ func main() {
 
 	getAllRouter := sm.Methods(http.MethodGet).Subrouter()
 	getAllRouter.HandleFunc("/record", h.GetAllRecords)
+
+	sm.PathPrefix("/documentation/").Handler(swag.WrapHandler)
 
 	s := http.Server{
 		Addr:         ":8080",

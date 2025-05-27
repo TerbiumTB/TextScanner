@@ -1,0 +1,120 @@
+basePath: /
+definitions:
+  handlers.DownloadResponse:
+    properties:
+      record:
+        $ref: '#/definitions/models.FileRecord'
+    type: object
+  handlers.UploadResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  models.FileRecord:
+    properties:
+      id:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API для хранения и управления файлами
+  title: File Storage API
+  version: "1.0"
+paths:
+  /download/{id}:
+    get:
+      description: Загружает файл по его уникальному идентификатору в формате multipart/form-data
+      parameters:
+      - description: Уникальный идентификатор файла
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - multipart/form-data
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.DownloadResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      tags:
+      - Загрузка
+  /record:
+    get:
+      description: Получает метаданные всех файлов
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список метаданных файлов
+          schema:
+            items:
+              $ref: '#/definitions/models.FileRecord'
+            type: array
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      tags:
+      - Инфо
+  /record/{id}:
+    get:
+      description: Получает метаданные файла по ID
+      parameters:
+      - description: Уникальный идентификатор файла
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Метаданные файла
+          schema:
+            $ref: '#/definitions/models.FileRecord'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      tags:
+      - Инфо
+  /upload/{filename}:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает файл на сервер и возвращает его уникальный идентификатор
+      parameters:
+      - description: Имя файла
+        in: path
+        name: filename
+        required: true
+        type: string
+      - description: Файл для загрузки
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.UploadResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      tags:
+      - Загрузка
+swagger: "2.0"

@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	_ "fileanalysis/docs"
 	"fileanalysis/handlers"
 	"fileanalysis/infrastructure"
 	"fileanalysis/pkg/postgres"
 	"fileanalysis/service"
 	"github.com/gorilla/mux"
+	"github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +16,12 @@ import (
 	"time"
 )
 
+// @title File Analysis API
+// @version 1.0
+// @description API для анализа файлов
+
+// @host localhost:8081
+// @BasePath /
 func main() {
 	l := log.New(os.Stdout, "API gateway ", log.LstdFlags)
 	c := &http.Client{Timeout: 10 * time.Second}
@@ -47,6 +55,8 @@ func main() {
 
 	wordCloudRouter := sm.Methods(http.MethodGet).Subrouter()
 	wordCloudRouter.HandleFunc("/wordcloud/{id}", h.GetWordCloud)
+
+	sm.PathPrefix("/documentation/").HandlerFunc(httpSwagger.WrapHandler)
 
 	server := http.Server{
 		Addr:         ":8080",

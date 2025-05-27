@@ -1,0 +1,94 @@
+basePath: /
+definitions:
+  models.FileStat:
+    properties:
+      id:
+        type: string
+      location:
+        type: string
+      paragraphs:
+        type: integer
+      sentences:
+        type: integer
+      symbols:
+        type: integer
+      words:
+        type: integer
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: API для анализа файлов
+  title: File Analysis API
+  version: "1.0"
+paths:
+  /stats:
+    get:
+      description: Возвращает статистику по всем файлам
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список статистики
+          schema:
+            items:
+              $ref: '#/definitions/models.FileStat'
+            type: array
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      summary: Получить всю статистику
+      tags:
+      - Статистика
+  /stats/{id}:
+    get:
+      description: Возвращает статистику по файлу
+      parameters:
+      - description: ID файла
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Статистика файла
+          schema:
+            $ref: '#/definitions/models.FileStat'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      summary: Получить статистику файла
+      tags:
+      - Статистика
+  /wordcloud/{id}:
+    get:
+      description: Генерирует и возвращает облако слов для файла в формате PNG
+      parameters:
+      - description: ID файла
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: Изображение PNG с облаком слов
+          headers:
+            Content-Type:
+              description: image/png
+              type: string
+          schema:
+            type: file
+        "500":
+          description: Ошибка генерации облака слов
+          schema:
+            type: string
+      summary: Получить облако слов
+      tags:
+      - Облако слов
+swagger: "2.0"

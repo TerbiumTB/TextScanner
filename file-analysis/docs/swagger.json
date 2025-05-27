@@ -1,0 +1,143 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API для анализа файлов",
+        "title": "File Analysis API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8081",
+    "basePath": "/",
+    "paths": {
+        "/stats": {
+            "get": {
+                "description": "Возвращает статистику по всем файлам",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Статистика"
+                ],
+                "summary": "Получить всю статистику",
+                "responses": {
+                    "200": {
+                        "description": "Список статистики",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.FileStat"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/stats/{id}": {
+            "get": {
+                "description": "Возвращает статистику по файлу",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Статистика"
+                ],
+                "summary": "Получить статистику файла",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID файла",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статистика файла",
+                        "schema": {
+                            "$ref": "#/definitions/models.FileStat"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/wordcloud/{id}": {
+            "get": {
+                "description": "Генерирует и возвращает облако слов для файла в формате PNG",
+                "produces": [
+                    "image/png"
+                ],
+                "tags": [
+                    "Облако слов"
+                ],
+                "summary": "Получить облако слов",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID файла",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Изображение PNG с облаком слов",
+                        "schema": {
+                            "type": "file"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "type": "string",
+                                "description": "image/png"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка генерации облака слов",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.FileStat": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "paragraphs": {
+                    "type": "integer"
+                },
+                "sentences": {
+                    "type": "integer"
+                },
+                "symbols": {
+                    "type": "integer"
+                },
+                "words": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

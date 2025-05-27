@@ -1,6 +1,7 @@
 package main
 
 import (
+	//_ "apigateway/docs/"
 	"apigateway/handlers"
 	"context"
 	"github.com/gorilla/mux"
@@ -11,6 +12,12 @@ import (
 	"time"
 )
 
+// @title API Gateway
+// @version 1.0
+// @description API Gateway
+
+// @host localhost:8000
+// @BasePath /
 func main() {
 	l := log.New(os.Stdout, "API gateway ", log.LstdFlags)
 	sm := mux.NewRouter()
@@ -35,9 +42,16 @@ func main() {
 
 	allStatsRouter := sm.Methods(http.MethodGet).Subrouter()
 	allStatsRouter.HandleFunc("/stats", handlers.AnalyseHandler)
+	http.FileServer(http.Dir("./static/"))
 
 	wordCloudRouter := sm.Methods(http.MethodGet).Subrouter()
 	wordCloudRouter.HandleFunc("/wordcloud/{id}", handlers.AnalyseHandler)
+
+	//sm.PathPrefix("/documentation/").HandlerFunc(httpSwagger.Handler(
+	//	httpSwagger.URL("./docs/swagger.json")))
+	//sm.HandleFunc("./docs/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+	//	http.ServeFile(w, r, "./docs/swagger.json")
+	//})
 
 	s := http.Server{
 		Addr:         ":8000",

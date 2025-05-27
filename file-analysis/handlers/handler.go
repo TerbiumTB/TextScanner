@@ -1,10 +1,7 @@
 package handlers
 
 import (
-	"fileanalysis/pkg/json"
 	"fileanalysis/service"
-	"github.com/gorilla/mux"
-	"io"
 	"log"
 	"net/http"
 )
@@ -21,9 +18,9 @@ func NewHandler(l *log.Logger, c *http.Client, s service.Serving) *Handler {
 	return &Handler{l, c, s}
 }
 
-type AnalysisResponse struct {
-	Filename string `json:"filename"`
-}
+//type AnalysisResponse struct {
+//	Filename string `json:"filename"`
+//}
 
 //func (h *Handler) CheckOriginalityHandler(wr http.ResponseWriter, r *http.Request) {
 //	//var res struct{
@@ -56,46 +53,3 @@ type AnalysisResponse struct {
 //	//
 //	_ = json.ToJSON(resp, wr)
 //}
-
-func (h *Handler) GetStatsHandler(wr http.ResponseWriter, r *http.Request) {
-	vargs := mux.Vars(r)
-	id := vargs["id"]
-
-	h.l.Printf("Analysing file \"%s\"...", id)
-
-	stat, err := h.s.GetStats(id)
-	if err != nil {
-		h.l.Printf("[ERROR] Error getting stats for file \"%s\": %v", id, err)
-		http.Error(wr, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	_ = json.ToJSON(stat, wr)
-}
-
-func (h *Handler) GetAllStatsHandler(wr http.ResponseWriter, r *http.Request) {
-	stats, err := h.s.GetAllStats()
-
-	if err != nil {
-		h.l.Printf("[ERROR] Error getting all stats: %v", err)
-		http.Error(wr, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	_ = json.ToJSON(stats, wr)
-}
-
-func (h *Handler) GetWordCloud(w http.ResponseWriter, r *http.Request) {
-	vargs := mux.Vars(r)
-	id := vargs["id"]
-
-	img, err := h.s.GetWordCloud(id)
-	if err != nil {
-		h.l.Printf("[ERROR] Error getting word cloud for file \"%s\": %v", id, err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	defer img.Close()
-
-	w.Header().Set("Content-Type", "image/png")
-	_, _ = io.Copy(w, img)
-}
