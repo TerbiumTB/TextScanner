@@ -37,6 +37,8 @@ services:
       - "8081:8080"
     env_file:
       - "file-analysis/.env"
+    volumes:
+      - word-cloud-images-data:/var/lib/docker/volumes/word-cloud-images-data
     depends_on:
      file-analysis-db:
         condition: service_healthy
@@ -74,6 +76,9 @@ services:
 
 volumes:
   file-storage-data:
+    driver: local
+
+  word-cloud-images-data:
     driver: local
 
   file-storage-pgdata:

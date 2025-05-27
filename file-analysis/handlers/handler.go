@@ -4,6 +4,7 @@ import (
 	"fileanalysis/pkg/json"
 	"fileanalysis/service"
 	"github.com/gorilla/mux"
+	"io"
 	"log"
 	"net/http"
 )
@@ -82,4 +83,19 @@ func (h *Handler) GetAllStatsHandler(wr http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = json.ToJSON(stats, wr)
+}
+
+func (h *Handler) GetWordCloud(w http.ResponseWriter, r *http.Request) {
+	vargs := mux.Vars(r)
+	id := vargs["id"]
+
+	img, err := h.s.GetWordCloud(id)
+	if err != nil {
+		h.l.Printf("[ERROR] Error getting word cloud for file \"%s\": %v", id, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	defer img.Close()
+
+	w.Header().Set("Content-Type", "image/png")
+	_, _ = io.Copy(w, img)
 }

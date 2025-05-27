@@ -20,4 +20,5 @@ type FileStat struct {
 	Words      int       `db:"words" json:"words"`
 	Sentences  int       `db:"sentences" json:"sentences"`
 	Paragraphs int       `db:"paragraphs" json:"paragraphs"`
+	Location   string    `db:"location" json:"location"`
 }

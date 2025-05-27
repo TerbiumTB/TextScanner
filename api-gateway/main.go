@@ -36,6 +36,9 @@ func main() {
 	allStatsRouter := sm.Methods(http.MethodGet).Subrouter()
 	allStatsRouter.HandleFunc("/stats", handlers.AnalyseHandler)
 
+	wordCloudRouter := sm.Methods(http.MethodGet).Subrouter()
+	wordCloudRouter.HandleFunc("/wordcloud/{id}", handlers.AnalyseHandler)
+
 	s := http.Server{
 		Addr:         ":8000",
 		Handler:      sm,

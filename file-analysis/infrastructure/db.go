@@ -19,7 +19,8 @@ func NewFileStatsDBX(db *sqlx.DB) (*FileStatDBX, error) {
 			symbols BIGINT,
 			words BIGINT,
 			sentences BIGINT,
-			paragraphs BIGINT
+			paragraphs BIGINT,
+			location TEXT
 		)
 	`)
 
@@ -31,8 +32,8 @@ func NewFileStatsDBX(db *sqlx.DB) (*FileStatDBX, error) {
 
 func (f *FileStatDBX) Add(stat *models.FileStat) (err error) {
 	_, err = f.db.NamedExec(`
-			INSERT INTO stats (id, symbols, words, sentences, paragraphs ) 
-			VALUES (:id, :symbols, :words, :sentences, :paragraphs)
+			INSERT INTO stats (id, symbols, words, sentences, paragraphs, location ) 
+			VALUES (:id, :symbols, :words, :sentences, :paragraphs, :location)
 			`, stat)
 
 	return

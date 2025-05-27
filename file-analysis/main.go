@@ -24,11 +24,13 @@ func main() {
 	}
 
 	stats, err := infrastructure.NewFileStatsDBX(db)
+
+	images := infrastructure.NewLocalStorage(os.Getenv("IMAGES_PATH"))
 	if err != nil {
 		l.Fatalf("[ERROR] couldn't initialize schema: %s", err)
 	}
 
-	s := service.NewService(c, stats)
+	s := service.NewService(c, stats, images)
 	//r := infrastructure.NewFileOriginalityDBX()
 
 	h := handlers.NewHandler(l, c, s)
@@ -42,6 +44,9 @@ func main() {
 
 	allStatsRouter := sm.Methods(http.MethodGet).Subrouter()
 	allStatsRouter.HandleFunc("/stats", h.GetAllStatsHandler)
+
+	wordCloudRouter := sm.Methods(http.MethodGet).Subrouter()
+	wordCloudRouter.HandleFunc("/wordcloud/{id}", h.GetWordCloud)
 
 	server := http.Server{
 		Addr:         ":8080",
